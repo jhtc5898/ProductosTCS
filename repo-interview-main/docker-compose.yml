@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+
+  repo-interview:
+      build: ./repo-interview-main
+      ports:
+        - "3002:3002"
+      depends_on:
+        - api
+
+  api:
+    build: ./controlProductos/js-app
+    container_name: product-api-js
+    ports:
+      - "3010:3010"
+    env_file: ./controlProductos/js-app/.env
+    volumes:
+      - .:/app
+    depends_on:
+      - rabbitmq
+      
+  worker:
+    build: ./controlProductos/js-app
+    container_name: product-worker-js
+    command: npm run worker
+    env_file: ./controlProductos/js-app/.env
+    volumes:
+      - .:/app
+    depends_on:
+      - rabbitmq
+
+  redis:
+      image: redis:latest
+      container_name: redis
+      ports:
+        - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
